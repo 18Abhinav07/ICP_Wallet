@@ -1,0 +1,17 @@
+// candid/icp_token_wallet.did
+
+type TokenWallet = record {
+    balances: vec record { principal; nat64; };
+    owner: opt principal;
+};
+
+type TransferArgs = record {
+    to: principal;
+    amount: nat64;
+};
+
+service : {
+    "transfer": (TransferArgs) -> (variant { Ok; Err: text; });
+    "get_balance": (principal) -> (nat64) query;
+    "mint": (principal, nat64) -> (variant { Ok; Err: text; });
+}

@@ -79,24 +79,32 @@ fn mint(to: Principal, amount: u64) -> Result<(), String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use ic_cdk::test::{mock, init};
 
     #[test]
     fn test_transfer() {
-        // Initialize wallet
-        init();
+        // Initialize wallet with mock caller (simulate caller principal)
+        mock(|caller| {
+            init();
+            let test_account = Principal::from_text("2vxsx-fae").unwrap();
 
-        // Mint some tokens to test account
-        let test_account = Principal::from_text("2vxsx-fae").unwrap();
-        mint(test_account, 1000).unwrap();
+            // Mint some tokens to test account
+            mint(test_account, 1000).unwrap();
 
-        // Test transfer
-        let transfer_args = TransferArgs {
-            to: Principal::from_text("rrkah-fqaaa-aaaaa-aaaaq-cai").unwrap(),
-            amount: 500,
-        };
-        transfer(transfer_args).unwrap();
+            // Simulate transfer
+            let transfer_args = TransferArgs {
+                to: Principal::from_text("rrkah-fqaaa-aaaaa-aaaaq-cai").unwrap(),
+                amount: 500,
+            };
 
-        // Verify balances
-        assert_eq!(get_balance(test_account), 500);
+            // Simulate caller's transfer
+            mock(|caller| {
+                transfer(transfer_args).unwrap();
+
+                // Verify balances
+                assert_eq!(get_balance(test_account), 500);
+            });
+
+        });
     }
 }
